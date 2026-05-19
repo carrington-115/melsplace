@@ -1,38 +1,100 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Mel's Place
+
+A full-stack e-commerce storefront built with Next.js 16, featuring a customer-facing shop, an admin dashboard, and a public landing page.
+
+## Tech Stack
+
+- **Framework**: Next.js 16 (App Router)
+- **Auth**: Clerk
+- **Database**: PostgreSQL via Drizzle ORM
+- **Storage/Backend**: Supabase
+- **Email**: Resend
+- **Styling**: Tailwind CSS v4 + shadcn/ui (Radix UI)
+- **State**: Zustand, TanStack Query
+- **Forms**: React Hook Form + Zod
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── (admin)/         # Admin dashboard (products, orders, customers, promotions)
+│   ├── (auth)/          # Clerk sign-in / sign-up pages
+│   ├── (store)/         # Customer storefront (products, cart, orders, wishlist)
+│   └── api/             # API routes (products, orders, addresses, webhooks, etc.)
+├── components/
+│   ├── admin/           # Admin-specific components
+│   ├── landing/         # Public landing page sections
+│   ├── store/           # Storefront components
+│   └── ui/              # shadcn/ui primitives
+├── db/                  # Drizzle schema, migrations, and seed
+├── hooks/               # use-cart, use-wishlist
+├── lib/                 # Supabase clients, Resend, validations, utils
+└── types/
+```
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Node.js 18+
+- A PostgreSQL database (Supabase recommended)
+- Clerk account
+- Supabase project (for storage)
+- Resend account (for transactional email)
+
+### Environment Variables
+
+Copy `.env.example` to `.env.local` and fill in:
+
+```
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+CLERK_SECRET_KEY=
+CLERK_WEBHOOK_SECRET=
+
+DATABASE_URL=
+
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+
+RESEND_API_KEY=
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Install & Run
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Push schema to the database
+npm run db:push
 
-## Learn More
+# (Optional) Seed with sample data
+npm run db:seed
 
-To learn more about Next.js, take a look at the following resources:
+# Start development server
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Open [http://localhost:3000](http://localhost:3000) to see the storefront.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Scripts
 
-## Deploy on Vercel
+| Command | Description |
+|---|---|
+| `npm run dev` | Start development server |
+| `npm run build` | Production build |
+| `npm run lint` | Run ESLint |
+| `npm run db:generate` | Generate Drizzle migration files |
+| `npm run db:migrate` | Run migrations |
+| `npm run db:push` | Push schema changes directly |
+| `npm run db:studio` | Open Drizzle Studio |
+| `npm run db:seed` | Seed the database |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Key Features
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# melsplace
-# melsplace
+- **Storefront**: product listing, product detail, cart, checkout, order history, wishlist, search
+- **Admin dashboard**: product/category management, order management, customer list, promotions, analytics chart
+- **Auth**: Clerk-powered sign-in/sign-up with role-based access (admin vs. customer)
+- **Email**: order confirmation and contact form emails via Resend
+- **Webhooks**: Clerk user sync via Svix

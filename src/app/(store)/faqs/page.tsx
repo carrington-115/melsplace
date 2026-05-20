@@ -10,7 +10,21 @@ import type { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "FAQs",
-  description: "Frequently asked questions about Mel's Place.",
+  description:
+    "Find answers to common questions about orders, delivery, products, returns, and more at Mel's Place.",
+  openGraph: {
+    title: "Frequently Asked Questions | Mel's Place",
+    description:
+      "Find answers to common questions about orders, delivery, products, returns, and more at Mel's Place.",
+    type: "website",
+    url: "/faqs",
+  },
+  twitter: {
+    card: "summary",
+    title: "Frequently Asked Questions | Mel's Place",
+    description:
+      "Find answers to common questions about orders, delivery, products, returns, and more at Mel's Place.",
+  },
 }
 
 export default async function FaqsPage() {

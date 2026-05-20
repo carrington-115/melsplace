@@ -7,7 +7,10 @@ import { ProfileForm } from "./profile-form"
 import { AddressesSection } from "./addresses-section"
 import type { Metadata } from "next"
 
-export const metadata: Metadata = { title: "Settings" }
+export const metadata: Metadata = {
+  title: "Settings",
+  robots: { index: false, follow: false },
+}
 
 export default async function SettingsPage() {
   const { userId } = await auth()

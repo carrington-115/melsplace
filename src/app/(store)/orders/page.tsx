@@ -8,7 +8,10 @@ import { Button } from "@/components/ui/button"
 import { OrdersList } from "@/components/store/orders-list"
 import type { Metadata } from "next"
 
-export const metadata: Metadata = { title: "My Orders" }
+export const metadata: Metadata = {
+  title: "My Orders",
+  robots: { index: false, follow: false },
+}
 
 export default async function OrdersPage() {
   const { userId } = await auth()

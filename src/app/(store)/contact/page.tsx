@@ -4,7 +4,21 @@ import type { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "Contact Us",
-  description: "Get in touch with Mel's Place.",
+  description:
+    "Get in touch with Mel's Place. Reach us by email, phone, or visit us in Charlotte, NC.",
+  openGraph: {
+    title: "Contact Mel's Place",
+    description:
+      "Get in touch with Mel's Place. Reach us by email, phone, or visit us in Charlotte, NC.",
+    type: "website",
+    url: "/contact",
+  },
+  twitter: {
+    card: "summary",
+    title: "Contact Mel's Place",
+    description:
+      "Get in touch with Mel's Place. Reach us by email, phone, or visit us in Charlotte, NC.",
+  },
 }
 
 export default function ContactPage() {

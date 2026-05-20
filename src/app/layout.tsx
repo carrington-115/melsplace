@@ -17,6 +17,9 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://melsplace.com"
+  ),
   title: {
     default: "Mel's Place — African Food Store",
     template: "%s | Mel's Place",
@@ -38,11 +41,20 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Mel's Place — African Food Store",
-    description: "Authentic African food products delivered across the US.",
+    description:
+      "Authentic African food products delivered to your door in Charlotte, NC and across the US.",
     siteName: "Mel's Place",
     locale: "en_US",
     type: "website",
-    images: [{ url: "/logo.png", width: 400, height: 400, alt: "Mel's Place" }],
+    url: "/",
+    images: [{ url: "/logo.png", width: 400, height: 400, alt: "Mel's Place logo" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Mel's Place — African Food Store",
+    description:
+      "Authentic African food products delivered to your door in Charlotte, NC and across the US.",
+    images: ["/logo.png"],
   },
 }
 

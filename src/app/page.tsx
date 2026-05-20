@@ -8,6 +8,26 @@ import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { FaqSection } from "@/components/landing/FaqSection";
 import { StorePreviewSection } from "@/components/landing/StorePreviewSection";
 import { LandingFooter } from "@/components/landing/LandingFooter";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Mel's Place — Authentic African Food Store",
+  description:
+    "Your one-stop shop for authentic African food in Charlotte, NC. Browse grains, spices, snacks, beverages, and more — delivered across the US.",
+  openGraph: {
+    title: "Mel's Place — Authentic African Food Store",
+    description:
+      "Your one-stop shop for authentic African food in Charlotte, NC. Browse grains, spices, snacks, beverages, and more — delivered across the US.",
+    type: "website",
+    url: "/",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Mel's Place — Authentic African Food Store",
+    description:
+      "Your one-stop shop for authentic African food in Charlotte, NC. Browse grains, spices, snacks, beverages, and more — delivered across the US.",
+  },
+};
 
 export default async function LandingPage() {
   let featuredProducts: Awaited<ReturnType<typeof fetchFeaturedProducts>> = [];

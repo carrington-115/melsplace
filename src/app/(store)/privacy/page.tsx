@@ -2,6 +2,15 @@ import type { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
+  description:
+    "Learn how Mel's Place collects, uses, and protects your personal information.",
+  openGraph: {
+    title: "Privacy Policy | Mel's Place",
+    description:
+      "Learn how Mel's Place collects, uses, and protects your personal information.",
+    type: "website",
+    url: "/privacy",
+  },
 }
 
 const SECTIONS = [

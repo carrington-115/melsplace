@@ -2,6 +2,15 @@ import type { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "Terms & Conditions",
+  description:
+    "Read the Terms & Conditions for using Mel's Place — covering orders, payments, delivery, returns, and more.",
+  openGraph: {
+    title: "Terms & Conditions | Mel's Place",
+    description:
+      "Read the Terms & Conditions for using Mel's Place — covering orders, payments, delivery, returns, and more.",
+    type: "website",
+    url: "/terms",
+  },
 }
 
 const SECTIONS = [

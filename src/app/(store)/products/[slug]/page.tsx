@@ -26,13 +26,26 @@ export async function generateMetadata({
 
   if (!product) return { title: "Product Not Found" }
 
+  const description = product.description ?? `Buy ${product.name} at Mel's Place — authentic African food delivered across the US.`
+  const ogImages = product.images[0]
+    ? [{ url: product.images[0].url, width: 800, height: 800, alt: product.name }]
+    : []
+
   return {
     title: product.name,
-    description: product.description ?? `Buy ${product.name} at Mel's Place`,
+    description,
     openGraph: {
-      images: product.images[0]
-        ? [{ url: product.images[0].url }]
-        : [],
+      title: `${product.name} | Mel's Place`,
+      description,
+      type: "website",
+      url: `/products/${slug}`,
+      images: ogImages,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${product.name} | Mel's Place`,
+      description,
+      images: ogImages.map((i) => i.url),
     },
   }
 }

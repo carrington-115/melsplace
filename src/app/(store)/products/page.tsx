@@ -18,6 +18,19 @@ export const metadata: Metadata = {
   title: "Products",
   description:
     "Browse our full range of authentic African food products — grains, spices, beverages, snacks, and more.",
+  openGraph: {
+    title: "Shop African Food Products | Mel's Place",
+    description:
+      "Browse our full range of authentic African food products — grains, spices, beverages, snacks, and more.",
+    type: "website",
+    url: "/products",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Shop African Food Products | Mel's Place",
+    description:
+      "Browse our full range of authentic African food products — grains, spices, beverages, snacks, and more.",
+  },
 }
 
 interface ProductsPageProps {

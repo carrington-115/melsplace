@@ -4,7 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { UserButton, SignInButton, useUser } from "@clerk/nextjs"
-import { ShoppingCart, Heart, Search, Menu, X, Sun, Moon } from "lucide-react"
+import { ShoppingCart, Heart, Search, Menu, X, Sun, Moon, Package } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useTheme } from "next-themes"
@@ -14,17 +14,20 @@ import { useState } from "react"
 import { cn } from "@/lib/utils"
 
 const NAV_LINKS = [
-  { label: "Products", href: "/products" },
-  { label: "FAQs", href: "/faqs" },
-  { label: "Contact", href: "/contact" },
+  { label: "Products", href: "/products", requiresAuth: false },
+  { label: "Orders", href: "/orders", requiresAuth: true },
+  { label: "FAQs", href: "/faqs", requiresAuth: false },
+  { label: "Contact", href: "/contact", requiresAuth: false },
 ]
 
 export function Header() {
   const { isSignedIn } = useUser()
   const pathname = usePathname()
   const { theme, setTheme } = useTheme()
-  const cartCount = useCartStore((s) => s.getItemCount())
-  const wishlistCount = useWishlistStore((s) => s.productIds.length)
+  const { getItemCount } = useCartStore()
+  const cartCount = getItemCount()
+  const { productIds: wishlistIds } = useWishlistStore()
+  const wishlistCount = wishlistIds.length
   const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
@@ -51,13 +54,13 @@ export function Header() {
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-6">
-            {NAV_LINKS.map((link) => (
+            {NAV_LINKS.filter((l) => !l.requiresAuth || isSignedIn).map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 className={cn(
                   "text-sm font-medium transition-colors hover:text-primary",
-                  pathname === link.href
+                  pathname === link.href || pathname.startsWith(link.href + "/")
                     ? "text-primary"
                     : "text-muted-foreground"
                 )}
@@ -87,6 +90,16 @@ export function Header() {
               <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
               <span className="sr-only">Toggle theme</span>
             </Button>
+
+            {/* Orders — signed-in only */}
+            {isSignedIn && (
+              <Button variant="ghost" size="icon" asChild className="hidden sm:inline-flex">
+                <Link href="/orders">
+                  <Package className="h-4 w-4" />
+                  <span className="sr-only">My Orders</span>
+                </Link>
+              </Button>
+            )}
 
             {/* Wishlist */}
             <Button variant="ghost" size="icon" asChild className="relative">
@@ -145,14 +158,14 @@ export function Header() {
       {/* Mobile Nav */}
       {mobileOpen && (
         <div className="md:hidden border-t bg-background px-4 py-4 space-y-2">
-          {NAV_LINKS.map((link) => (
+          {NAV_LINKS.filter((l) => !l.requiresAuth || isSignedIn).map((link) => (
             <Link
               key={link.href}
               href={link.href}
               onClick={() => setMobileOpen(false)}
               className={cn(
                 "block py-2 text-sm font-medium transition-colors hover:text-primary",
-                pathname === link.href
+                pathname === link.href || pathname.startsWith(link.href + "/")
                   ? "text-primary"
                   : "text-muted-foreground"
               )}

@@ -1,7 +1,14 @@
 import { auth } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
-import { db, users, orders, orderItems, addresses } from "@/db"
-import { eq } from "drizzle-orm"
+import { db } from "@/db"
+import {
+  users,
+  orders,
+  orderItems,
+  addresses,
+  products,
+} from "@/db/schema"
+import { eq, sql } from "drizzle-orm"
 import { generateOrderNumber, formatPrice } from "@/lib/utils"
 import {
   sendOrderConfirmationEmail,
@@ -47,7 +54,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Cart is empty" }, { status: 400 })
   }
 
-  // Look up internal user
   const user = await db.query.users.findFirst({
     where: eq(users.clerkId, userId),
   })
@@ -55,57 +61,72 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "User not found" }, { status: 404 })
   }
 
-  // Handle delivery address
-  let shippingAddressId: string | null = null
-  if (body.fulfillmentType === "delivery" && body.newAddress) {
-    const [addr] = await db
-      .insert(addresses)
+  // Wrap all DB writes in a transaction so failures roll back atomically
+  const { orderId, orderNumber } = await db.transaction(async (tx) => {
+    // Handle delivery address
+    let shippingAddressId: string | null = null
+    if (body.fulfillmentType === "delivery" && body.newAddress) {
+      const [addr] = await tx
+        .insert(addresses)
+        .values({
+          userId: user.id,
+          label: body.newAddress.label ?? "Home",
+          line1: body.newAddress.line1,
+          line2: body.newAddress.line2 ?? null,
+          city: body.newAddress.city,
+          state: body.newAddress.state,
+          zip: body.newAddress.zip,
+          isDefault: body.newAddress.saveAddress ? true : false,
+        })
+        .returning({ id: addresses.id })
+      shippingAddressId = addr.id
+    }
+
+    // Create order
+    const orderNum = generateOrderNumber()
+    const [order] = await tx
+      .insert(orders)
       .values({
+        orderNumber: orderNum,
         userId: user.id,
-        label: body.newAddress.label ?? "Home",
-        line1: body.newAddress.line1,
-        line2: body.newAddress.line2 ?? null,
-        city: body.newAddress.city,
-        state: body.newAddress.state,
-        zip: body.newAddress.zip,
-        isDefault: false,
+        status: "pending",
+        fulfillmentType: body.fulfillmentType,
+        subtotal: String(body.subtotal.toFixed(2)),
+        tax: String(body.tax.toFixed(2)),
+        shipping: String(body.shipping.toFixed(2)),
+        total: String(body.total.toFixed(2)),
+        shippingAddressId,
+        customerNotes: body.customerNotes ?? null,
       })
-      .returning({ id: addresses.id })
-    shippingAddressId = addr.id
-  }
+      .returning({ id: orders.id })
 
-  // Create order
-  const orderNumber = generateOrderNumber()
-  const [order] = await db
-    .insert(orders)
-    .values({
-      orderNumber,
-      userId: user.id,
-      status: "pending",
-      fulfillmentType: body.fulfillmentType,
-      subtotal: String(body.subtotal.toFixed(2)),
-      tax: String(body.tax.toFixed(2)),
-      shipping: String(body.shipping.toFixed(2)),
-      total: String(body.total.toFixed(2)),
-      shippingAddressId,
-      customerNotes: body.customerNotes ?? null,
-    })
-    .returning({ id: orders.id })
+    // Create order items
+    await tx.insert(orderItems).values(
+      body.items.map((item) => ({
+        orderId: order.id,
+        productId: item.productId,
+        productName: item.productName,
+        productImageUrl: item.productImageUrl,
+        quantity: item.quantity,
+        unitPrice: String(item.unitPrice.toFixed(2)),
+        totalPrice: String((item.unitPrice * item.quantity).toFixed(2)),
+      }))
+    )
 
-  // Create order items
-  await db.insert(orderItems).values(
-    body.items.map((item) => ({
-      orderId: order.id,
-      productId: item.productId,
-      productName: item.productName,
-      productImageUrl: item.productImageUrl,
-      quantity: item.quantity,
-      unitPrice: String(item.unitPrice.toFixed(2)),
-      totalPrice: String((item.unitPrice * item.quantity).toFixed(2)),
-    }))
-  )
+    // Decrement inventory for each item
+    await Promise.all(
+      body.items.map((item) =>
+        tx
+          .update(products)
+          .set({ inventory: sql`${products.inventory} - ${item.quantity}` })
+          .where(eq(products.id, item.productId))
+      )
+    )
 
-  // Send emails (non-blocking — don't fail the order if email fails)
+    return { orderId: order.id, orderNumber: orderNum }
+  })
+
+  // Send emails (non-blocking — order success is independent of email)
   try {
     await sendOrderConfirmationEmail({
       to: user.email,
@@ -128,5 +149,5 @@ export async function POST(req: Request) {
     console.error("Email send failed:", err)
   }
 
-  return NextResponse.json({ orderId: order.id, orderNumber })
+  return NextResponse.json({ orderId, orderNumber })
 }

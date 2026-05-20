@@ -4,11 +4,14 @@ import { db, users, orders } from "@/db"
 import { eq, and } from "drizzle-orm"
 import Image from "next/image"
 import Link from "next/link"
+import { Suspense } from "react"
 import { ArrowLeft, MapPin, Store } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { OrderStatusBadge } from "@/components/store/order-status-badge"
 import { OrderTracker } from "@/components/store/order-tracker"
+import { PaymentResultHandler } from "@/components/store/payment-result-handler"
+import { CancelOrderButton } from "@/components/store/cancel-order-button"
 import { formatPrice } from "@/lib/utils"
 import type { Metadata } from "next"
 
@@ -60,8 +63,22 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
             })}
           </p>
         </div>
-        <OrderStatusBadge status={order.status} />
+        <div className="flex items-center gap-3 shrink-0">
+          <OrderStatusBadge status={order.status} />
+          {(order.status === "pending" || order.status === "confirmed") && (
+            <CancelOrderButton orderId={order.id} orderNumber={order.orderNumber} />
+          )}
+        </div>
       </div>
+
+      {/* Payment result handler (client) */}
+      <Suspense>
+        <PaymentResultHandler
+          orderId={order.id}
+          paymentStatus={order.paymentStatus}
+          fulfillmentType={order.fulfillmentType}
+        />
+      </Suspense>
 
       {/* Order tracker */}
       <div className="rounded-xl border p-6 mb-6">

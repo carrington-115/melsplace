@@ -15,7 +15,7 @@ interface AddToCartSectionProps {
 
 export function AddToCartSection({ product }: AddToCartSectionProps) {
   const [quantity, setQuantity] = useState(1)
-  const addItem = useCartStore((s) => s.addItem)
+  const { addItem } = useCartStore()
   const { toggle, isWishlisted } = useWishlistStore()
   const wishlisted = isWishlisted(product.id)
   const isOutOfStock = product.inventory === 0

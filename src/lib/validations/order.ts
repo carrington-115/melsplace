@@ -6,7 +6,7 @@ export const placeOrderSchema = z.object({
   customerNotes: z.string().max(500).optional().nullable(),
   newAddress: z
     .object({
-      label: z.string().min(1),
+      label: z.string().optional().default("Home"),
       line1: z.string().min(5, "Street address required"),
       line2: z.string().optional().nullable(),
       city: z.string().min(2),

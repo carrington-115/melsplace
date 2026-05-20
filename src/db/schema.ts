@@ -35,6 +35,14 @@ export const fulfillmentTypeEnum = pgEnum("fulfillment_type", [
   "pickup",
 ])
 
+export const paymentStatusEnum = pgEnum("payment_status", [
+  "unpaid",
+  "pending",
+  "paid",
+  "failed",
+  "refunded",
+])
+
 export const contactTypeEnum = pgEnum("contact_type", [
   "general",
   "fraud",
@@ -201,6 +209,8 @@ export const orders = pgTable("orders", {
     () => addresses.id,
     { onDelete: "set null" }
   ),
+  paymentStatus: paymentStatusEnum("payment_status").notNull().default("unpaid"),
+  paymentId: text("payment_id"),
   adminNotes: text("admin_notes"),
   customerNotes: text("customer_notes"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -349,6 +359,7 @@ export type WishlistItem = typeof wishlistItems.$inferSelect
 export type CartItem = typeof cartItems.$inferSelect
 export type Order = typeof orders.$inferSelect
 export type NewOrder = typeof orders.$inferInsert
+export type PaymentStatus = (typeof paymentStatusEnum.enumValues)[number]
 export type OrderItem = typeof orderItems.$inferSelect
 export type NewOrderItem = typeof orderItems.$inferInsert
 export type ContactSubmission = typeof contactSubmissions.$inferSelect

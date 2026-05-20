@@ -28,3 +28,16 @@ export async function PATCH(
 
   return NextResponse.json({ success: true })
 }
+
+export async function DELETE(
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  if (!(await requireAdmin()))
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+
+  const { id } = await params
+  await db.delete(orders).where(eq(orders.id, id))
+
+  return NextResponse.json({ success: true })
+}

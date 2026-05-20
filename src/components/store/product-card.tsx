@@ -27,7 +27,7 @@ const COUNTRY_FLAGS: Record<string, string> = {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const addItem = useCartStore((s) => s.addItem)
+  const { addItem } = useCartStore()
   const activePromo = product.promotions?.find((p) => p.isActive)
 
   const displayPrice = activePromo
@@ -73,24 +73,28 @@ export function ProductCard({ product }: ProductCardProps) {
             </div>
           )}
 
-          {/* Badges overlay */}
-          <div className="absolute top-2 left-2 flex flex-col gap-1">
-            {activePromo && (
-              <Badge className="text-xs font-semibold px-2 py-0.5">
-                {activePromo.label}
-              </Badge>
-            )}
-            {isLowStock && !isOutOfStock && (
-              <Badge variant="destructive" className="text-xs px-2 py-0.5">
-                Only {product.inventory} left!
-              </Badge>
-            )}
-            {isOutOfStock && (
-              <Badge variant="secondary" className="text-xs px-2 py-0.5">
-                Out of Stock
-              </Badge>
-            )}
-          </div>
+          {/* Stock badges — top left */}
+          {(isLowStock || isOutOfStock) && (
+            <div className="absolute top-2 left-2 flex flex-col gap-1">
+              {isLowStock && !isOutOfStock && (
+                <Badge variant="destructive" className="text-xs px-2 py-0.5">
+                  Only {product.inventory} left!
+                </Badge>
+              )}
+              {isOutOfStock && (
+                <Badge variant="secondary" className="text-xs px-2 py-0.5">
+                  Out of Stock
+                </Badge>
+              )}
+            </div>
+          )}
+
+          {/* Promotion ribbon — full-width strip at bottom of image */}
+          {activePromo && (
+            <div className="absolute bottom-0 left-0 right-0 bg-primary/90 backdrop-blur-sm text-primary-foreground text-[11px] font-bold text-center py-1.5 tracking-wide">
+              {activePromo.label}
+            </div>
+          )}
 
           {/* Wishlist button */}
           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -122,15 +126,19 @@ export function ProductCard({ product }: ProductCardProps) {
           )}
 
           <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1.5">
-              <span className="font-semibold text-sm text-foreground">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className={`font-semibold text-sm ${activePromo ? "text-primary" : "text-foreground"}`}>
                 {formatPrice(displayPrice ?? Number(product.price))}
               </span>
-              {product.compareAtPrice && (
+              {displayPrice !== null ? (
+                <span className="text-xs text-muted-foreground line-through">
+                  {formatPrice(Number(product.price))}
+                </span>
+              ) : product.compareAtPrice ? (
                 <span className="text-xs text-muted-foreground line-through">
                   {formatPrice(Number(product.compareAtPrice))}
                 </span>
-              )}
+              ) : null}
             </div>
 
             <Button

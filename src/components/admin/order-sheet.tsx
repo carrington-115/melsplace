@@ -25,6 +25,24 @@ import { toast } from "sonner"
 import { formatPrice } from "@/lib/utils"
 import type { OrderWithItems } from "@/types"
 
+const PAYMENT_STATUS_STYLES: Record<string, string> = {
+  unpaid: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
+  pending: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
+  paid: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300",
+  failed: "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300",
+  refunded: "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300",
+}
+
+function PaymentStatusBadge({ status }: { status: string }) {
+  return (
+    <span
+      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium capitalize ${PAYMENT_STATUS_STYLES[status] ?? ""}`}
+    >
+      {status}
+    </span>
+  )
+}
+
 const STATUSES = [
   { value: "pending", label: "Pending" },
   { value: "confirmed", label: "Confirmed" },
@@ -77,7 +95,10 @@ export function OrderSheet({
         <SheetHeader className="mb-4">
           <div className="flex items-center justify-between gap-3">
             <SheetTitle className="text-left">{order.orderNumber}</SheetTitle>
-            <OrderStatusBadge status={order.status} />
+            <div className="flex items-center gap-2 shrink-0">
+              <PaymentStatusBadge status={order.paymentStatus} />
+              <OrderStatusBadge status={order.status} />
+            </div>
           </div>
         </SheetHeader>
 

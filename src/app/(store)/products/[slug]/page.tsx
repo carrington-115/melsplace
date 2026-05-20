@@ -1,12 +1,13 @@
 import { notFound } from "next/navigation"
 import { db } from "@/db"
 import { products, categories, productImages, promotions } from "@/db/schema"
-import { eq, and, asc } from "drizzle-orm"
+import { eq, and, asc, or, isNull } from "drizzle-orm"
 import { ProductCarousel } from "@/components/store/product-carousel"
 import { RelatedProducts } from "@/components/store/related-products"
 import { AddToCartSection } from "./add-to-cart-section"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { Tag } from "lucide-react"
 import { formatPrice, getDiscountedPrice } from "@/lib/utils"
 import type { Metadata } from "next"
 
@@ -68,7 +69,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
     db
       .select()
       .from(promotions)
-      .where(and(eq(promotions.productId, product.id), eq(promotions.isActive, true))),
+      .where(
+        and(
+          or(eq(promotions.productId, product.id), isNull(promotions.productId)),
+          eq(promotions.isActive, true)
+        )
+      ),
     product.categoryId
       ? db
           .select()
@@ -158,20 +164,43 @@ export default async function ProductPage({ params }: ProductPageProps) {
             )}
           </div>
 
+          {/* Promotion banner */}
+          {activePromo && (
+            <div className="rounded-lg bg-primary/10 border border-primary/30 px-4 py-3 flex items-start gap-3">
+              <Tag className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-semibold text-primary">{activePromo.label}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {activePromo.discountType === "percentage"
+                    ? `${activePromo.discountValue}% off the listed price`
+                    : activePromo.discountType === "fixed"
+                      ? `$${activePromo.discountValue} off the listed price`
+                      : "Buy one, get one free"}
+                  {activePromo.endsAt && (
+                    <> · Ends {new Date(activePromo.endsAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</>
+                  )}
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Pricing */}
           <div className="flex items-end gap-3">
             <span className="text-3xl font-bold text-foreground">
               {formatPrice(displayPrice ?? Number(product.price))}
             </span>
-            {product.compareAtPrice && (
+            {displayPrice ? (
+              <span className="text-lg text-muted-foreground line-through mb-0.5">
+                {formatPrice(Number(product.price))}
+              </span>
+            ) : product.compareAtPrice ? (
               <span className="text-lg text-muted-foreground line-through mb-0.5">
                 {formatPrice(Number(product.compareAtPrice))}
               </span>
-            )}
+            ) : null}
             {displayPrice && (
               <span className="text-sm font-medium text-primary mb-0.5">
-                Save{" "}
-                {formatPrice(Number(product.price) - displayPrice)}
+                Save {formatPrice(Number(product.price) - displayPrice)}
               </span>
             )}
           </div>

@@ -8,6 +8,13 @@
       "when": 1778892562422,
       "tag": "0000_wild_master_chief",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1779154528712,
+      "tag": "0001_omniscient_golden_guardian",
+      "breakpoints": true
     }
   ]
 }

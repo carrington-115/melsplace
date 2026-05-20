@@ -10,7 +10,6 @@ import {
   Users,
   Tag,
   Settings,
-  ExternalLink,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -70,17 +69,6 @@ export function AdminSidebar() {
         })}
       </nav>
 
-      {/* Footer */}
-      <div className="border-t px-3 py-3">
-        <Link
-          href="/products"
-          target="_blank"
-          className="flex items-center gap-2 px-3 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-muted"
-        >
-          <ExternalLink className="h-3.5 w-3.5" />
-          View Storefront
-        </Link>
-      </div>
     </aside>
   )
 }

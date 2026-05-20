@@ -6,10 +6,11 @@ import {
   productImages,
   promotions,
 } from "@/db/schema"
-import { eq, and, ilike, asc, desc, or } from "drizzle-orm"
+import { eq, and, ilike, asc, desc, or, isNull } from "drizzle-orm"
 import { ProductCard } from "@/components/store/product-card"
 import { CategoryFilter } from "@/components/store/category-filter"
 import { SearchBar } from "@/components/store/search-bar"
+import { SortSelect } from "@/components/store/sort-select"
 import { Skeleton } from "@/components/ui/skeleton"
 import type { Metadata } from "next"
 
@@ -65,15 +66,20 @@ async function ProductsGrid({
         ? desc(products.price)
         : desc(products.createdAt)
 
-  const productList = await db.query.products.findMany({
-    where: and(...filters),
-    orderBy,
-    with: {
-      category: true,
-      images: { orderBy: asc(productImages.position), limit: 1 },
-      promotions: { where: eq(promotions.isActive, true) },
-    },
-  })
+  const [productList, storeWidePromos] = await Promise.all([
+    db.query.products.findMany({
+      where: and(...filters),
+      orderBy,
+      with: {
+        category: true,
+        images: { orderBy: asc(productImages.position), limit: 1 },
+        promotions: { where: eq(promotions.isActive, true) },
+      },
+    }),
+    db.query.promotions.findMany({
+      where: and(isNull(promotions.productId), eq(promotions.isActive, true)),
+    }),
+  ])
 
   if (productList.length === 0) {
     return (
@@ -92,7 +98,13 @@ async function ProductsGrid({
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
       {productList.map((product) => (
-        <ProductCard key={product.id} product={product} />
+        <ProductCard
+          key={product.id}
+          product={{
+            ...product,
+            promotions: [...(product.promotions ?? []), ...storeWidePromos],
+          }}
+        />
       ))}
     </div>
   )
@@ -129,9 +141,14 @@ export default async function ProductsPage({
         <Suspense>
           <SearchBar />
         </Suspense>
-        <Suspense>
-          <CategoryFilter categories={allCategories} />
-        </Suspense>
+        <div className="flex items-start gap-3 overflow-x-auto">
+          <Suspense>
+            <CategoryFilter categories={allCategories} />
+          </Suspense>
+          <Suspense>
+            <SortSelect />
+          </Suspense>
+        </div>
       </div>
 
       {/* Products grid */}

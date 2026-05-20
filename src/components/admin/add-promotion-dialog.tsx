@@ -34,12 +34,14 @@ interface AddPromotionDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   productId?: string
+  onSuccess?: () => void
 }
 
 export function AddPromotionDialog({
   open,
   onOpenChange,
   productId,
+  onSuccess,
 }: AddPromotionDialogProps) {
   const [loading, setLoading] = useState(false)
 
@@ -67,6 +69,7 @@ export function AddPromotionDialog({
       toast.success("Promotion created")
       form.reset()
       onOpenChange(false)
+      onSuccess?.()
     } catch {
       toast.error("Failed to create promotion")
     } finally {
